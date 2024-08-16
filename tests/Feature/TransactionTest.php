@@ -106,6 +106,9 @@ class TransactionTest extends TestCase
 
         $result = DB::select("SELECT * FROM categories");
         self::assertCount(2, $result);
-    
     }
+
+
+
+
 }

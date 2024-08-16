@@ -2,21 +2,28 @@
 
 namespace Tests\Feature;
 
+<<<<<<< HEAD
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+=======
+>>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
+<<<<<<< HEAD
 use function PHPSTORM_META\map;
 
+=======
+>>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
 class QueryBuilderTest extends TestCase
 {
     public function setUp():void {
         parent::setUp();
+<<<<<<< HEAD
         DB::table("products")->delete();
         DB::table("categories")->delete();
     }
@@ -121,10 +128,47 @@ class QueryBuilderTest extends TestCase
         $collection = DB::table("categories")->select(["id", "name"])->get();
         $this->assertNotNull($collection);
 
+=======
+        DB::table("categories")->truncate();
+    }
+
+    public function insertCategories() {
+        DB::table("categories")->insert([
+            "id" => "GADGET",
+            "name" => "Tablet"
+        ]);
+        
+        DB::table("categories")->insert([
+            "id" => "OTOMOTIF",
+            "name" => "RX - King"
+        ]);
+        
+        DB::table("categories")->insert([
+            "id" => "SMARTPHONE",
+            "name" => "Handphone"
+        ]);
+
+        DB::table("categories")->insert([
+            "id" => "BOOKS",
+            "name" => "Stoicism"
+        ]);
+    }
+
+    public function testUpdate() {
+        $this->insertCategories();
+
+        DB::table("categories")->where("id", "=", "GADGET")->update([
+            "name" => "Xiaomi"
+        ]);
+
+        $collection = DB::table("categories")->where("name", "=", "Handphone")->get();
+        self::assertCount(1, $collection);
+>>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
         $collection->each(function ($item) {
             Log::info(json_encode($item));
         });
     }
+<<<<<<< HEAD
 
     public function insertManyCategories() {
         for($i = 0; $i < 100; $i++) {
@@ -186,4 +230,6 @@ class QueryBuilderTest extends TestCase
     
 
 
+=======
+>>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
 }
