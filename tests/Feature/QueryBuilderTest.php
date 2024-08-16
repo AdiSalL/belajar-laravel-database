@@ -2,28 +2,21 @@
 
 namespace Tests\Feature;
 
-<<<<<<< HEAD
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-=======
->>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
-<<<<<<< HEAD
 use function PHPSTORM_META\map;
 
-=======
->>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
 class QueryBuilderTest extends TestCase
 {
     public function setUp():void {
         parent::setUp();
-<<<<<<< HEAD
         DB::table("products")->delete();
         DB::table("categories")->delete();
     }
@@ -52,6 +45,11 @@ class QueryBuilderTest extends TestCase
         DB::table('categories')->insert([
             "id" => "MONITOR",
             "name" => "Monitor X",
+        ]);
+
+        DB::table('categories')->insert([
+            "id" => "FOOD",
+            "name" => "Food Berkuah",
         ]);
     }
 
@@ -100,7 +98,7 @@ class QueryBuilderTest extends TestCase
         $this->insertCategories();
 
         $result = DB::table("categories")->whereNull("description")->get();
-        self::assertCount(5, $result);
+        self::assertCount(6, $result);
         $result->each(function($item) {
             Log::info(json_encode($item));
         });
@@ -128,47 +126,10 @@ class QueryBuilderTest extends TestCase
         $collection = DB::table("categories")->select(["id", "name"])->get();
         $this->assertNotNull($collection);
 
-=======
-        DB::table("categories")->truncate();
-    }
-
-    public function insertCategories() {
-        DB::table("categories")->insert([
-            "id" => "GADGET",
-            "name" => "Tablet"
-        ]);
-        
-        DB::table("categories")->insert([
-            "id" => "OTOMOTIF",
-            "name" => "RX - King"
-        ]);
-        
-        DB::table("categories")->insert([
-            "id" => "SMARTPHONE",
-            "name" => "Handphone"
-        ]);
-
-        DB::table("categories")->insert([
-            "id" => "BOOKS",
-            "name" => "Stoicism"
-        ]);
-    }
-
-    public function testUpdate() {
-        $this->insertCategories();
-
-        DB::table("categories")->where("id", "=", "GADGET")->update([
-            "name" => "Xiaomi"
-        ]);
-
-        $collection = DB::table("categories")->where("name", "=", "Handphone")->get();
-        self::assertCount(1, $collection);
->>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
         $collection->each(function ($item) {
             Log::info(json_encode($item));
         });
     }
-<<<<<<< HEAD
 
     public function insertManyCategories() {
         for($i = 0; $i < 100; $i++) {
@@ -222,14 +183,80 @@ class QueryBuilderTest extends TestCase
         
         $collection = DB::table('products')->sum("price");
         self::assertEquals(4500000, $collection);
+    }
 
+    public function testQueryBuilderWithAggregate() {
+        $this->insertProducts();
+        $collection = DB::table("products")->
+        select(
+            DB::raw("count(id) as total_product"),
+            DB::raw("min(price) as min_price"),
+            DB::raw("max(price) as max_price"),
+        )->get();
+            
+        self::assertEquals(2, $collection[0]->total_product);
+        self::assertEquals(2000000, $collection[0]->min_price);
+        self::assertEquals(2500000, $collection[0]->max_price);
         
+    }
 
+    public function insertProductsFood() {
+        DB::table("products")->insert([
+            'id' => "3",
+            "name" => "Bakso",
+            "category_id" => "FOOD",
+            "price" => 20000,
+        ]);
+
+        DB::table("products")->insert([
+            'id' => "4",
+            "name" => "Mie Ayam Bakso",
+            "category_id" => "FOOD",
+            "price" => 25000,
+        ]);
+    }
+
+    public function testGroupBy() {
+        $this->insertProducts();
+        $this->insertProductsFood();
+
+        $collection = DB::table("products")
+        ->select("category_id", DB::raw("count(*) as total_product"))
+        ->groupBy("category_id")
+        ->orderBy("category_id", "desc")->get();
+        
+        self::assertCount(2, $collection);
+        self::assertEquals("SMARTPHONE", $collection[0]->category_id);
+        self::assertEquals("FOOD", $collection[1]->category_id);
+        
+        
+        self::assertEquals(2, $collection[0]->total_product);
+        self::assertEquals(2, $collection[1]->total_product);
     }
 
     
+    public function testGroupByHaving() {
+        $this->insertProducts();
+        $this->insertProductsFood();
 
+        $collection = DB::table("products")
+        ->select("category_id", DB::raw("count(*) as total_product"))
+        ->groupBy("category_id")
+        ->having(DB::raw("count(*)"), ">", 2)
+        ->orderBy("category_id", "desc")->get();
+        
+        self::assertCount(0, $collection);
+    }
 
-=======
->>>>>>> b99784e338cbd736c6fcdde5769ba4148e8f91e3
+    public function testQueryBuilderLocking() {
+        $this->insertProducts();
+        DB::transaction(function () {
+            $collection = DB::table("products")
+            ->where("id", "=", "1")
+            ->lockForUpdate()
+            ->get();
+
+            self::assertCount(1, $collection);
+        });
+    }
 }
