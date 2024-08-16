@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +33,7 @@ class QueryBuilderTest extends TestCase
         
         DB::table("categories")->insert([
             "id" => "SMARTPHONE",
-            "name" => "Handphone"
+            "name" => "Smartphone X",
         ]);
 
         DB::table("categories")->insert([
