@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\CounterSeeder;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -19,27 +21,23 @@ class QueryBuilderTest extends TestCase
         parent::setUp();
         DB::table("products")->delete();
         DB::table("categories")->delete();
+        DB::table("counters")->delete();
+        
     }
 
     public function insertCategories() {
-        DB::table("categories")->insert([
-            "id" => "GADGET",
-            "name" => "Tablet"
-        ]);
-        DB::table("categories")->insert([
-            "id" => "OTOMOTIF",
-            "name" => "Motor Bicycle"
-        ]);
-        
-        DB::table("categories")->insert([
-            "id" => "SMARTPHONE",
-            "name" => "Smartphone X",
-        ]);
+        $this->seed(CategorySeeder::class);
+    }
 
-        DB::table("categories")->insert([
-            "id" => "BOOKS",
-            "name" => "Knowledge"
-        ]);
+    public function testIncrement() {
+        $this->seed(CounterSeeder::class);
+        DB::table("counters")->where("id","=", "sample")->increment("counter", 1);
+
+        $collection = DB::table("counters")->where("id","=", "sample")->get();
+        $this->assertCount(1, $collection);
+        $collection->each(function($item) {
+            Log::info(json_encode($item));
+        });
     }
 
     public function insertProducts() {
