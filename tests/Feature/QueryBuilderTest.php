@@ -123,6 +123,66 @@ class QueryBuilderTest extends TestCase
         });
     }
 
+    public function testPagination() {
+        $this->insertCategories();
+
+        $paginate = DB::table("categories")->paginate(perPage: 2, page: 2);
+        $this->assertEquals(2, $paginate->currentPage());
+        $this->assertEquals(2, $paginate->perPage());
+        $this->assertEquals(2, $paginate->lastPage());
+        $this->assertEquals(4, $paginate->total());
+        
+        $collection = $paginate->items();
+        self::assertCount(2, $collection);
+        foreach($collection as $item) {
+            Log::info(json_encode($item));
+        };
+    }
+
+    public function testIterateAllPagination() {
+        $this->insertCategories();
+
+        $page = 1;
+
+        while(true) {
+            $paginate = DB::table("categories")->paginate(perPage: 2, page: $page);
+            
+            if($paginate->isEmpty()){
+                break;
+            }else {
+                $page++;
+                $collection = $paginate->items();
+                self::assertCount(2, $collection);
+                foreach($collection as $item) {
+                    Log::info(json_encode($item));
+                };
+            }
+        }
+
+    }
+
+    public function testQueryBuilderCursorPagination() {
+        $this->insertCategories();
+
+        $cursor = "id";
+        while(true) {
+            $paginate = DB::table("categories")->orderBy("id")->cursorPaginate(perPage: 2, cursor: $cursor);
+
+            foreach($paginate->items() as $item) {
+                self::assertNotNull($item);
+                Log::info(json_encode($item));
+            }
+
+            $cursor = $paginate->nextCursor();
+            if($cursor == null) {
+                break;
+            }
+        }
+
+    }
+
+
+
 
     // public function testUpdate() {
     //     $this->insertCategories();
